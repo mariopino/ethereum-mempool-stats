@@ -19,11 +19,12 @@
 </template>
 
 <script>
-import Web3 from 'web3';
-import axios from 'axios';
-import { ethers } from 'ethers';
+import Web3 from 'web3'
+import axios from 'axios'
+import { ethers } from 'ethers'
 
-const ethWs = 'wss://solitary-thrilling-sanctuary.discover.quiknode.pro/7fd63709abe3764c33ec3d0c6e689e3f2a80c0f6/';
+const ethWs =
+  'wss://solitary-thrilling-sanctuary.discover.quiknode.pro/7fd63709abe3764c33ec3d0c6e689e3f2a80c0f6/'
 const options = {
   timeout: 30000,
   clientConfig: {
@@ -36,7 +37,7 @@ const options = {
     maxAttempts: 15,
     onTimeout: false,
   },
-};
+}
 
 export default {
   name: 'IndexPage',
@@ -46,7 +47,7 @@ export default {
       tps: 0,
       size: 20,
       fields: [
-      {
+        {
           key: 'timestamp',
           label: 'Timestamp',
           sortable: false,
@@ -86,60 +87,65 @@ export default {
           label: 'Max priority fee per gas',
           sortable: false,
         },
-
-
-
-      ]
+      ],
     }
   },
   async created() {
-    await this.getEthGas();
-    
-    const web3 = new Web3(new Web3.providers.WebsocketProvider(ethWs, options));
-    const subscription = web3.eth.subscribe("pendingTransactions", (err, res) => {
-      if (err) console.error(err);
-    });
+    await this.getEthGas()
 
-    subscription.on("data", (txHash) => {
+    const web3 = new Web3(new Web3.providers.WebsocketProvider(ethWs, options))
+    const subscription = web3.eth.subscribe(
+      'pendingTransactions',
+      (err, res) => {
+        // eslint-disable-next-line no-console
+        if (err) console.error(err)
+      }
+    )
+
+    subscription.on('data', (txHash) => {
       setTimeout(async () => {
         try {
-          const tx = await web3.eth.getTransaction(txHash);
+          const tx = await web3.eth.getTransaction(txHash)
           if (tx !== null) {
-            tx.timestamp = new Date().getTime();
+            tx.timestamp = new Date().getTime()
             tx.maxFee = `${ethers.utils.formatUnits(
-              ethers.BigNumber.from(tx.gas.toString()).mul(ethers.BigNumber.from(tx.gasPrice.toString())),
+              ethers.BigNumber.from(tx.gas.toString()).mul(
+                ethers.BigNumber.from(tx.gasPrice.toString())
+              ),
               'ether'
-            )} ETH`;
-            console.log(tx);
+            )} ETH`
+            // eslint-disable-next-line no-console
+            console.log(tx)
             this.lastTxs.unshift(tx)
             if (this.lastTxs.length > this.size) {
-              this.lastTxs.pop();
+              this.lastTxs.pop()
             }
             // calculate tx rate
             if (this.lastTxs.length === this.size) {
-              const firstTimestamp = this.lastTxs[this.size - 1].timestamp;
-              const lastTimestamp = this.lastTxs[0].timestamp;
-              const time = (lastTimestamp - firstTimestamp) / 1000;
-              this.tps = this.size / time;
-              console.log(`rate: ${this.tps.toFixed(2)} tps`);
+              const firstTimestamp = this.lastTxs[this.size - 1].timestamp
+              const lastTimestamp = this.lastTxs[0].timestamp
+              const time = (lastTimestamp - firstTimestamp) / 1000
+              this.tps = this.size / time
+              // eslint-disable-next-line no-console
+              console.log(`rate: ${this.tps.toFixed(2)} tps`)
             }
-            
           }
         } catch (err) {
-          console.error(err);
+          // eslint-disable-next-line no-console
+          console.error(err)
         }
-      });
-    });
-
+      })
+    })
   },
   methods: {
     async getEthGas() {
       const response = await axios.get(
-      'https://ethgasstation.info/api/ethgasAPI.json?',
-    );
-    this.ethGas = response.data;
-    console.log(this.ethGas)
-    }
-  }
+        'https://ethgasstation.info/api/ethgasAPI.json?'
+      )
+      this.ethGas = response.data
+      // eslint-disable-next-line no-console
+      console.log(this.ethGas)
+    },
+  },
 }
 </script>
