@@ -1,8 +1,15 @@
 <template>
   <b-container fluid>
     <b-row class="mb-2">
+      <b-col cols="8">
+        <h1>ethereum mempool transactions</h1>
+      </b-col>
+      <b-col cols="4">
+        <h1 class="text-right">{{ tps.toFixed(2) }} tps</h1>
+      </b-col>
+    </b-row>
+    <b-row>
       <b-col cols="12">
-        <h1>mempool transactions</h1>
         <div class="table-responsive">
           <b-table striped hover :fields="fields" :items="lastTxs" />
         </div>
@@ -36,6 +43,7 @@ export default {
   data() {
     return {
       lastTxs: [],
+      tps: 0,
       size: 20,
       fields: [
       {
@@ -98,17 +106,24 @@ export default {
           const tx = await web3.eth.getTransaction(txHash);
           if (tx !== null) {
             tx.timestamp = new Date().getTime();
-
             tx.maxFee = `${ethers.utils.formatUnits(
               ethers.BigNumber.from(tx.gas.toString()).mul(ethers.BigNumber.from(tx.gasPrice.toString())),
               'ether'
             )} ETH`;
-
             console.log(tx);
             this.lastTxs.unshift(tx)
             if (this.lastTxs.length > this.size) {
               this.lastTxs.pop();
             }
+            // calculate tx rate
+            if (this.lastTxs.length === this.size) {
+              const firstTimestamp = this.lastTxs[this.size - 1].timestamp;
+              const lastTimestamp = this.lastTxs[0].timestamp;
+              const time = (lastTimestamp - firstTimestamp) / 1000;
+              this.tps = this.size / time;
+              console.log(`rate: ${this.tps.toFixed(2)} tps`);
+            }
+            
           }
         } catch (err) {
           console.error(err);
