@@ -7,7 +7,7 @@ export default {
 
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    title: 'ethpulse',
+    title: 'ethereum mempool stats',
     htmlAttrs: {
       lang: 'en',
     },
